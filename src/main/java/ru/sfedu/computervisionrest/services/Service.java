@@ -17,11 +17,13 @@ import org.apache.logging.log4j.Logger;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import ru.sfedu.computervisionlab.Constants;
 import ru.sfedu.computervisionlab.api.ImageApi;
 import ru.sfedu.computervisionlab.utils.Utils;
 import ru.sfedu.computervisionrest.model.FileUploadFillFloodForm;
+import ru.sfedu.computervisionrest.model.FileUploadFindRectForm;
 import ru.sfedu.computervisionrest.model.FileUploadForm;
 import ru.sfedu.computervisionrest.utils.FileUtil;
 
@@ -355,5 +357,26 @@ public class Service {
         FileUtil.deleteFile(dirRes + newName);
         FileUtil.deleteFile(dir + fileName);
         return Response.ok((Object) data).header("Content-Disposition", "attachment;filename=" + newName).build();
+    }
+    
+    @POST
+    @Path("/findRect/")
+    @Consumes("multipart/form-data")
+//    @Produces({"image/jpeg", "image/png"})
+    public Response findRect(@MultipartForm FileUploadFindRectForm form) throws IOException {
+        logger.info("findRect method");
+        logger.info("Upload file");
+        String fileName = form.getFileName();
+        byte[] arr = form.getData();
+        FileUtil.writeFile(arr, fileName, dir);
+        if (form.gethMax() == null || form.gethMin() == null || form.getwMax() == null || form.getwMin() == null){
+            logger.error("Wrong size");
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        Size min = new Size(form.getwMin(), form.gethMin());
+        Size max = new Size(form.getwMax(), form.gethMax());
+        int count = api.findRect(api.loadImage(fileName), min, max);
+        FileUtil.deleteFile(dir + fileName);
+        return Response.ok(count).build();
     }
 }
