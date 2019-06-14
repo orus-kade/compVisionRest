@@ -13,7 +13,7 @@ import ru.sfedu.computervisionrest.services.Service;
  *
  * @author orus-kade
  */
-@ApplicationPath("/testapp")
+@ApplicationPath("/app")
 public class CompVisionApplication extends Application{
 
     private static final Logger logger = LogManager.getLogger(CompVisionApplication.class);
